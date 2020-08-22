@@ -1,0 +1,55 @@
+LIBRARY SLOTSSIMULATOR
+
+EXPORTS
+; Global commands
+	reload_settings
+
+; Running spins / games
+	one_spin_run
+	bulk_run
+	bulk_agg_stat
+	get_max_threads
+	bulk_log_results
+	reset_sim
+	set_bet
+	set_balance
+	get_balance
+
+; Display game
+	get_symbol
+	get_cell_tag
+	get_width
+	get_height
+	get_free_spin_order
+	get_spin_message
+
+; Get per payline outcomes
+	win_line_symbol
+	win_line_is_win
+	win_line_length
+	win_line_value
+	win_line_where
+	get_win_line_maxcount
+	get_scatter_win
+	get_scatters_count
+
+; Current game results
+	get_spin_win
+	get_spin_type
+	get_spin_type_next
+
+; Statistics
+	get_total_paid
+	get_total_win
+;get_total_win_free
+	get_awarded_free_spins
+;get_total_win_paid
+
+	get_games_count
+	get_games_count_arr
+	get_free_spin_win
+
+; Calculated ratios
+	get_rtp
+	get_hit_rate
+;get_bonus_cycle

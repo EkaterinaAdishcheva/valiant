@@ -1,0 +1,15 @@
+﻿None	-1	None	//only working symbol
+
+T1	0	White	// 10
+TJ	1	White	// J
+TQ	2	White	// Q
+TK	3	White	// K
+TA	4	White	// A
+F1	5	White	// Face 1
+F2	6	White	// Face 2
+F3	7	White	// Face 3
+F4	8	White	// Face 4
+F5	9	White	// Face Not use
+WI	10	LightGreen	// Wild
+SC	11	Yellow	// Scatter
+LF	12	Red	// Locked Frame
