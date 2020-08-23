@@ -143,6 +143,8 @@ bool Game_Type::IsNewBonusAwarded() {
 }
 
 bool Game_Type::IsCollectingSpin() {
-	return spin_type_now == lighting_spin && spin_type_next == lighting_spin
+	return false;
+/*	return spin_type_now == lighting_spin && spin_type_next == lighting_spin
 		|| spin_type_now == lighting_free_spin && spin_type_next == lighting_free_spin;
+*/
 }

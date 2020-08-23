@@ -282,6 +282,9 @@ int bulk_log_results(char * filename, int maxlen, const char * gamename, int gam
 
 	fwprintf_s(log_file, L"\nReels (<REELS>)\n");
 	print_reels(log_file, L"#Base reels\n", simulator.base_game.game_state.data->reels[0], simulator.base_game.game_state.data->reel_length[0]);
+	print_reels(log_file, L"#Base lightning reels\n", simulator.base_game.game_state.data->reels[1], simulator.base_game.game_state.data->reel_length[1]);
+	print_reels(log_file, L"#Free game reels\n", simulator.base_game.game_state.data->reels[2], simulator.base_game.game_state.data->reel_length[2]);
+	print_reels(log_file, L"#Free lightning reels\n", simulator.base_game.game_state.data->reels[3], simulator.base_game.game_state.data->reel_length[3]);
 	fwprintf_s(log_file, L"</REELS>\n\nReel Formula (spec)\n");
 	for (k = 0; k < SYMBOLS; k++) {
 		for (j = 0; j < REEL_VARIANTS; j++) {

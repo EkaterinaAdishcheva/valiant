@@ -1,9 +1,6 @@
 @echo off
 rm -v reels?.txt
 
-copy spec1.txt spec2.txt
-copy spec1.txt spec3.txt
-
 spec2rep.py spec0.txt
 spec2rep.py spec1.txt
 spec2rep.py spec2.txt
