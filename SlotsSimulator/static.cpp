@@ -100,7 +100,6 @@ void Game_Type::SetBase() {
 		expanded_wild[i] = false;
 	}
 
-
 	win_lines = 0;
 
 	win_spin = win_seq = win_base = win_game = 0;
@@ -109,14 +108,14 @@ void Game_Type::SetBase() {
 
 	for (i = 0; i < SPIN_TYPES; i++)
 	{
-		free_spins_order[i] = 0;
-		free_spin_current[i] = 0;
+		free_spins_awarded[i] = 0;
+		free_spin_order[i] = 0;
 	}
 	win_lightning = 0;
 	free_spin_lightning_ind = false;
-	multiplier_now = 0;
-	multiplier_next = 0;
+	multiplier_now = multiplier_next = 0;
 
+	reset_game = true;
 }
 //----------------------------------------------------------------------
 
@@ -140,9 +139,10 @@ bool Game_Type::IsLastInSequence() {
 
 bool Game_Type::IsNewBonusAwarded() {
 	return spin_type_now == paid_spin && spin_type_next != paid_spin
-		|| spin_type_now == free_respin && spin_type_next == lighting_spin;
+		|| spin_type_now == free_respin && spin_type_next == lighting_free_spin;
 }
 
 bool Game_Type::IsCollectingSpin() {
-	return spin_type_now == lighting_spin && spin_type_next == lighting_spin;
+	return spin_type_now == lighting_spin && spin_type_next == lighting_spin
+		|| spin_type_now == lighting_free_spin && spin_type_next == lighting_free_spin;
 }

@@ -13,3 +13,4 @@ F5	9	White	// Face Not use
 WI	10	LightGreen	// Wild
 SC	11	Yellow	// Scatter
 LF	12	Red	// Locked Frame
+EW	13	Blue	// Expanded

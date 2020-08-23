@@ -17,70 +17,69 @@ void Game_Params_Calc_Type::CalculateParams(Game_Params_Type * params) {
 void Game_Type::Drawings() {
 	int i, j, pos, wi_count;
 
-	if (free_spin_current[paid_spin] == 1) {
+	if (reset_game) {
 		memset(expanded_wild, false, sizeof(expanded_wild));
 		memset(screen.list, 0, sizeof(screen.list));
 	}
-
-	for (i = 0; i < game_state.width; i++) {
-		for (j = 0; j < game_state.height[i]; j++) {
-			if (!expanded_wild[i]) {
-				if (screen.grid[i][j] == WI) {
-					screen.grid[i][j] = LF;
+	else {
+		for (i = 0; i < game_state.width; i++) {
+			for (j = 0; j < game_state.height[i]; j++) {
+				if (!expanded_wild[i]) {
+					if (screen.grid[i][j] == WI) {
+						screen.grid[i][j] = LF;
+					}
 				}
 			}
 		}
 	}
 
 	for (i = 0; i < game_state.width; i++) {
-		pos = (int)rnd.RANDOM(game_state.reel_length[i]);
-		positions_reels[i] = pos;
-		for (j = 0; j < game_state.height[i]; j++) {
-			if (expanded_wild[i]) {
+		if (expanded_wild[i]) {
+			for (j = 0; j < game_state.height[i]; j++) {
 				screen.grid[i][j] = WI;
-				continue;
 			}
-			if (screen.grid[i][j] != LF) {
-				screen.grid[i][j] = game_state.reels[i][(pos + j) % game_state.reel_length[i]];
+		}
+		else {
+			pos = positions_reels[i] = (int)rnd.RANDOM(game_state.reel_length[i]);
+			for (j = 0; j < game_state.height[i]; j++) {
+				if (screen.grid[i][j] != LF) {
+					screen.grid[i][j] = game_state.reels[i][(pos + j) % game_state.reel_length[i]];
+				}
 			}
 		}
 	}
-	free_spin_current[paid_spin] = 0;
-	if ((spin_type_now == free_respin) && (free_spin_current[free_respin] == 12) && !free_spin_lightning_ind)
+	reset_game = false;
+
+	// Add expanded wild column on 12th free spin (if it has not occured earlier)
+	int wild_count_max_column;
+	if ((spin_type_now == free_respin) && (free_spin_order[free_respin] == 12) && !free_spin_lightning_ind)
 	{
 		int wild_count[WIDTH];
 
-
 		for (i = 0; i < game_state.width; i++) {
-			if (!expanded_wild[i]) {
-				wild_count[i] = 0;
-				for (j = 0; j < game_state.height[i]; j++) {
-					if (screen.grid[i][j] == WI || screen.grid[i][j] == LF) {
-						wild_count[i]++;
-					}
+			wild_count[i] = 0;
+			for (j = 0; j < game_state.height[i]; j++) {
+				if (screen.grid[i][j] == WI || screen.grid[i][j] == LF) {
+					wild_count[i]++;
 				}
-				if (wild_count[i] == game_state.height[i])
-				{
-					free_spin_lightning_ind = true;
-					break;
-				}
+			}
+			if (wild_count[i] == game_state.height[i])
+			{
+				free_spin_lightning_ind = true;
+				break;
+			}
+			if (i == 0) {
+				wild_count_max_column = 0;
+			} else if (wild_count[i] > wild_count[wild_count_max_column]) {
+				wild_count_max_column = i;
 			}
 		}
 		if (!free_spin_lightning_ind) {
-			int wild_count_max_column;
-			wild_count_max_column = 0;
-			for (i = 1; i < game_state.width; i++) {
-				if (wild_count[i] > wild_count[wild_count_max_column])
-				{
-					wild_count_max_column = i;
-				}
-			}
 			for (j = 0; j < game_state.height[wild_count_max_column]; j++) {
 				if ((screen.grid[wild_count_max_column][j] != WI) && (screen.grid[wild_count_max_column][j] != LF)) {
 					screen.grid[wild_count_max_column][j] = WI;
 				}
 			}
-
 		}
 
 	}
@@ -132,7 +131,7 @@ void Game_Type::LinesAnalysis(){
 					if (screen.grid[i][j] == k || screen.grid[i][j] == WI) {
 						matches[k][i][matches_count[k][i]] = j;
 						matches_count[k][i]++;
-						matches_lenth[k] = i+1;
+						matches_lenth[k] = i + 1;
 					}
 				}
 				if (matches_count[k][i] == 0) {
@@ -154,7 +153,6 @@ void Game_Type::LinesAnalysis(){
 
 		win = game_state.bet_unit * game_state.data->paytable[k][matches_lenth[k]] * multiplier;
 		memset(pos, 0, sizeof(pos));
-		
 	
 		while (1) {
 			bool specific_symbpol = false;
@@ -198,71 +196,70 @@ void Game_Type::ScatterAnalysis() {
 	int i, j, k;
 	int scatter_count = 0;
 
-	if (spin_type_now != lighting_spin) {
-		for (i = 0; i < game_state.width; i++)
-		{
-			for (j = 0; j < game_state.height[i]; j++) {
-				if (screen.grid[i][j] == SC) {
-					scatter_count++;
-				}
-			}
-		}
+	if (spin_type_now != paid_spin) {
+		return;
+	}
 
-		if (scatter_count >= 3)
-		{
-			free_spins_order[free_respin] = 12;
-			free_spin_current[free_respin] = 0;
-			free_spin_current[paid_spin] = 1;
-			spin_type_next = free_respin;
-			free_spin_lightning_ind = false;
+	for (i = 0; i < game_state.cells; i++)
+	{
+		if (screen.list[i] == SC) {
+			scatter_count++;
 		}
+	}
+
+	if (scatter_count >= 3)
+	{
+		free_spins_awarded[free_respin] = 12;
+		free_spin_lightning_ind = false;
 	}
 }
 
 void Game_Type::Lightning() {
 	int i, j;
-
-	int wild_count;
+	int count_expanded = 0;
 
 	for (i = 0; i < game_state.width; i++) {
-		if (!expanded_wild[i]) {
-			wild_count = 0;
-			for (j = 0; j < game_state.height[i]; j++) {
-				if (screen.grid[i][j] == WI || screen.grid[i][j] == LF) {
-					wild_count++;
-				}
+		if (expanded_wild[i]) {
+			count_expanded += 1;
+			continue;
+		}
+		int wild_count = 0;
+		for (j = 0; j < game_state.height[i]; j++) {
+			if (screen.grid[i][j] == WI || screen.grid[i][j] == LF) {
+				wild_count++;
 			}
-			if (wild_count == game_state.height[i])
+		}
+		if (wild_count == game_state.height[i])
+		{
+			expanded_wild[i] = true;
+
+			if (spin_type_now == free_respin || spin_type_now == lighting_free_spin) {
+				spin_type_next = lighting_free_spin;
+			}
+			else {
+				spin_type_next = lighting_spin;
+			}
+			free_spins_awarded[spin_type_next] = 3;
+			free_spin_order[spin_type_next] = 0;
+			win_lightning = 0;
+
+			if (spin_type_now == free_respin) {
+				free_spin_lightning_ind = true;
+			}
+
+			if (spin_type_now == free_respin || spin_type_now == lighting_free_spin)
 			{
-				if (spin_type_now == free_respin || spin_type_now == lighting_free_spin) {
-					expanded_wild[i] = true;
-					free_spins_order[lighting_free_spin] = 3;
-					free_spin_current[lighting_free_spin] = 0;
-					spin_type_next = lighting_free_spin;
-					win_lightning = 0;
-				}
-				if (spin_type_now == paid_spin || spin_type_now == lighting_spin) {
-					expanded_wild[i] = true;
-					free_spins_order[lighting_spin] = 3;
-					free_spin_current[lighting_spin] = 0;
-					spin_type_next = lighting_spin;
-					win_lightning = 0;
-				}
-				if (spin_type_now == free_respin)
-				{
-					free_spin_lightning_ind = true;
-				}
-				if (spin_type_now == free_respin || spin_type_now == lighting_free_spin)
-				{
-					multiplier_next = multiplier_now + 
-						rnd.random_weighted_val(game_state.data->params.MultiplierWeights[0],
+				multiplier_next = multiplier_now + 
+					rnd.random_weighted_val(game_state.data->params.MultiplierWeights[0],
 						game_state.data->params.MultiplierWeights[1],
-							game_state.data->params_calc.MultiplierWeights, MULTIPLIER_OPTIONS);
-				}
+						game_state.data->params_calc.MultiplierWeights,
+						MULTIPLIER_OPTIONS);
 			}
 		}
 	}
-
+	if (count_expanded == game_state.width) {
+		free_spins_awarded[spin_type_now] = free_spin_order[spin_type_now];
+	}
 }
 
 //----------------------------------------------------------------------------
@@ -275,27 +272,30 @@ void Game_Type::OneSpinExecute()  //executing of one game
 	game_state.SetSpinType(spin_type_now);
 	spin_type_next = paid_spin;
 
-	if (free_spins_order[lighting_spin] == 0) {
-		free_spin_current[lighting_spin] = 0;
-	}
-
-	if (free_spins_order[free_respin] == 0) {
-		free_spin_current[free_respin] = 0;
-	}
-
-	if (free_spins_order[lighting_free_spin] == 0) {
-		free_spin_current[lighting_free_spin] = 0;
-	}
-
 	if (spin_type_now != lighting_free_spin) {
 		multiplier_now = 0;
 	}
 
 	win_spin = 0;
+	if (spin_type_now == paid_spin) {
+		win_seq = win_game = 0;
+		free_spins_awarded[1] = free_spins_awarded[2] =
+			free_spins_awarded[3] = 0;
+		free_spin_order[1] = free_spin_order[2] =
+			free_spin_order[3] = 0;
+	}
+	if (spin_type_now == free_respin) {
+		free_spins_awarded[lighting_free_spin] = 0;
+		free_spin_order[lighting_free_spin] = 0;
+	}
+
+	if (spin_type_now == paid_spin || spin_type_now == free_respin) {
+		win_lightning = 0;
+	}
 
 	if (spin_type_now != paid_spin)
 	{
-		free_spin_current[spin_type_now] ++;
+		free_spin_order[spin_type_now] ++;
 	}
 
 	Drawings();
@@ -303,55 +303,37 @@ void Game_Type::OneSpinExecute()  //executing of one game
 	ScatterAnalysis();
 	Lightning();
 
-	if (spin_type_now == lighting_spin)
+	win_game += win_spin;
+	if (spin_type_now != paid_spin)
+	{
+		win_seq += win_spin;
+	}
+
+	if (spin_type_now == lighting_spin || spin_type_now == lighting_free_spin)
 	{
 		win_lightning += win_spin;
-		if ((win_lightning == 0) && (free_spin_current[lighting_spin] >= 3))
+		if ((win_lightning == 0) && (free_spin_order[spin_type_now] >= 3))
 		{
-			free_spins_order[lighting_spin] ++;
+			free_spins_awarded[spin_type_now] ++;
 		}
 	}
 
-	if (spin_type_now == lighting_free_spin)
-	{
-		win_lightning += win_spin;
-		if ((win_lightning == 0) && (free_spin_current[lighting_free_spin] >= 3))
-		{
-			free_spins_order[lighting_free_spin] ++;
-		}
-	}
-
-	win_game = 0;
-
-	if (spin_type_now == paid_spin) {
-		win_seq = win_game = 0;
-	}
-
-	if (free_spin_current[free_respin] < free_spins_order[free_respin]) {
+	if (free_spin_order[free_respin] < free_spins_awarded[free_respin]) {
 		spin_type_next = free_respin;
 	}
 
-	if (free_spin_current[free_respin] < free_spins_order[free_respin]) {
-		if (spin_type_next == paid_spin) {
-			free_spin_current[paid_spin] = 1;
-			multiplier_next = 0;
-		}
-	}
-
-	if (free_spin_current[lighting_spin] < free_spins_order[lighting_spin]) {
+	if (free_spin_order[lighting_spin] < free_spins_awarded[lighting_spin]) {
 		spin_type_next = lighting_spin;
 	}
 
-	if (free_spin_current[lighting_free_spin] < free_spins_order[lighting_free_spin]) {
+	if (free_spin_order[lighting_free_spin] < free_spins_awarded[lighting_free_spin]) {
 		spin_type_next = lighting_free_spin;
 	}
 
-	if (spin_type_next == paid_spin && spin_type_now != paid_spin) {
-		free_spin_current[paid_spin] = 1;
+	if (spin_type_next != spin_type_now && spin_type_next != lighting_spin
+			&& spin_type_next != lighting_free_spin) {
+		reset_game = true;
 		multiplier_next = 0;
 	}
-	
-	win_seq += win_spin;
-	// spin_type_next is paid_spin or it is set by LightningAnalysis()
 }
 //----------------------------------------------------------------------------

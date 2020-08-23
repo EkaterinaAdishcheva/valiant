@@ -4,7 +4,7 @@
 
 #define NUM_SIM 16
 
-#define MAX_WIN (4096*250 + 3072*250)
+#define MAX_WIN (3000000)
 #define MAX_SEQ (WIDTH + 1)
 #define GROUPS_MAX 10000
 #define GROUP_SEP 100000

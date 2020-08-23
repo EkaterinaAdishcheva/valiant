@@ -12,7 +12,8 @@ Base definitions
 enum Symbols {
 	WI = 10, // wild
 	SC = 11, // scatter
-	LF = 12 // locked frame
+	LF = 12, // locked frame
+	EW = 13, // expanded wild
 };
 
 #define SPIN_TYPES 4
@@ -25,7 +26,7 @@ enum Spin_Type {
 
 #define REEL_OPTIONS 1
 // Number of different reel set
-#define REEL_VARIANTS 3
+#define REEL_VARIANTS 4
 // Number of different game states: spin types x reel variants
 #define SLOT_VARIANTS SPIN_TYPES
 
@@ -157,6 +158,7 @@ public:
 		} screen; // symbols on the grid. two ways to access
 
 		bool expanded_wild[WIDTH];
+		bool reset_game;
 
 		int multiplier_now;
 		int multiplier_next;
@@ -185,8 +187,8 @@ public:
 		int NextIdx();
 
 		// Free spins counters
-		int free_spins_order[SPIN_TYPES];    //remaining free spins number
-		int free_spin_current[SPIN_TYPES];    //current free spins number
+		int free_spins_awarded[SPIN_TYPES];    //remaining free spins number
+		int free_spin_order[SPIN_TYPES];    //current free spins number
 
 		bool IsNewBonusAwarded();
 		bool IsLastInSequence();

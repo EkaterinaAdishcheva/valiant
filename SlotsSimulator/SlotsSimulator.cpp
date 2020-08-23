@@ -245,9 +245,6 @@ int bulk_log_results(char * filename, int maxlen, const char * gamename, int gam
 			}
 		}
 	}
-	fwprintf_s(log_file, L"Total type 1 trigger %.2lf\n", (double)simulator.spin_count /
-		(simulator.bonus_trigger[0][1].cases + simulator.bonus_trigger[2][1].cases));
-
 
 	// Settings
 	fwprintf_s(log_file, L"\nPAYTABLE\n");
@@ -377,6 +374,11 @@ int bulk_log_results(char * filename, int maxlen, const char * gamename, int gam
 }
 
 int get_symbol(int line, int reel) {
+	if ( simulator.base_game.screen.grid[reel][line] == WI
+		&& simulator.base_game.expanded_wild[reel] ) {
+
+		return EW;
+	}
 	return simulator.base_game.screen.grid[reel][line];
 }
 
@@ -520,15 +522,15 @@ int set_balance(UINT64 _balance) {
 	return 0;
 }
 UINT64 get_awarded_free_spins() {
-	int maximum = simulator.base_game.free_spins_order[simulator.base_game.spin_type_now];
-	if (simulator.base_game.free_spin_current[simulator.base_game.spin_type_now] > maximum)
+	int maximum = simulator.base_game.free_spins_awarded[simulator.base_game.spin_type_now];
+	if (simulator.base_game.free_spin_order[simulator.base_game.spin_type_now] > maximum)
 	{
-		maximum = simulator.base_game.free_spin_current[simulator.base_game.spin_type_now];
+		maximum = simulator.base_game.free_spin_order[simulator.base_game.spin_type_now];
 	}
 	return maximum;
 }
 UINT64 get_free_spin_order() {
-	return simulator.base_game.free_spin_current[simulator.base_game.spin_type_now];
+	return simulator.base_game.free_spin_order[simulator.base_game.spin_type_now];
 }
 
 
