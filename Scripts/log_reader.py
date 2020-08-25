@@ -23,7 +23,7 @@ else:
     inf = sys.stdin
     sfile = sys.stdout
     rfile = sys.stdout
-reellen = 500
+reellen = 1000
     
 # skip summary
 while 1:
