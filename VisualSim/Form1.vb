@@ -589,7 +589,7 @@ Public Class Form1
             font3 = New Font("Tahoma", 8)
         End If
 
-        Dim xinc As Long, yinc As Long
+        Dim xinc As Integer, yinc As Integer
         xinc = (picScatter.Width - 2 * brd) / GetWidth()
         yinc = (picScatter.Height - 2 * brd) / GetHeight(2)
         Dim sz As Drawing.Size
@@ -609,9 +609,7 @@ Public Class Form1
                     brush1 = New SolidBrush(Color.FromName(repertoir_type(tt)))
                     e.Graphics.DrawString(repertoir(tt), font1, brush1, p)
                     If GetCellTag(y - 1, x - 1) > 0 Then
-                        p.Offset(xinc / 2, yinc / 2 + 3)
-                        e.Graphics.DrawString(GetCellTag(y - 1, x - 1), font3, brush1, p)
-                        p.Offset(-xinc / 2, -(yinc / 2 + 3))
+                        e.Graphics.DrawLine(Pens.DarkOrange, p.X + 3, p.Y + yinc - 3, p.X + xinc - 20, p.Y + yinc - 3)
                     End If
                 End If
                 p.Offset(0, yinc)

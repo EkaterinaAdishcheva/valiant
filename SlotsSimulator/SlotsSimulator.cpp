@@ -264,21 +264,11 @@ int bulk_log_results(char * filename, int maxlen, const char * gamename, int gam
 			fwprintf_s(log_file, L"\n");
 		}
 	}
-//	fwprintf_s(log_file, L"\nPARAMS\n");
-//	fwprintf_s(log_file, L"# Prob lightning trigger\n");
-	// print_line(log_file, simulator.base_game.game_state.data->params.FeatureProbNumerator, WIDTH);
-	// print_line(log_file, simulator.base_game.game_state.data->params.FeatureProbDenominator, WIDTH);
-	// fwprintf_s(log_file, L"# Symbol weights\n");
-	// fwprintf_s(log_file, L"%d\t%d\n",
-	//	simulator.base_game.game_state.data->params.H1ProbNumerator,
-	//	simulator.base_game.game_state.data->params.H1ProbDenominator);
-
-//	fwprintf_s(log_file, L"# Symbol weights\n");
-//	for (i = 0; i < SYMBOLS; i++) {
-//		fwprintf_s(log_file, (i == 0 ? L"%d" : L"\t%d"),
-//			simulator.base_game.game_state.data->params.SymbolWeightsRespin[i]);
-//	}
-//	fwprintf_s(log_file, L"\n");
+	fwprintf_s(log_file, L"\nPARAMS\n");
+	fwprintf_s(log_file, L"# Lightning mitiplier\n");
+	print_line(log_file, simulator.base_game.game_state.data->params.MultiplierWeights[0], MULTIPLIER_OPTIONS);
+	print_line(log_file, simulator.base_game.game_state.data->params.MultiplierWeights[1], MULTIPLIER_OPTIONS);
+	fwprintf_s(log_file, L"\n");
 
 	fwprintf_s(log_file, L"\nReels (<REELS>)\n");
 	print_reels(log_file, L"#Base reels\n", simulator.base_game.game_state.data->reels[0], simulator.base_game.game_state.data->reel_length[0]);
@@ -386,7 +376,7 @@ int get_symbol(int line, int reel) {
 }
 
 int get_cell_tag(int line, int reel) {
-	return 0;
+	return simulator.base_game.locked_frame.grid[reel][line];
 }
 
 int get_spin_message(char * message, int max_len) {

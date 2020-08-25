@@ -153,9 +153,13 @@ public:
 		void Drawings();               // drawings
 		int positions_reels[WIDTH];    // reels positions
 		union {
-			int grid[WIDTH][HEIGHT]; 
-			int list[(WIDTH)*(HEIGHT)]; 
+			int grid[WIDTH][HEIGHT];
+			int list[(WIDTH)*(HEIGHT)];
 		} screen; // symbols on the grid. two ways to access
+		union {
+			bool grid[WIDTH][HEIGHT];
+			bool list[(WIDTH)*(HEIGHT)];
+		} locked_frame; // places where locked frames are put
 
 		bool expanded_wild[WIDTH];
 		bool reset_game;

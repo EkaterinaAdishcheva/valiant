@@ -18,15 +18,15 @@ void Game_Type::Drawings() {
 	int i, j, pos, wi_count;
 
 	if (reset_game) {
+		memset(locked_frame.list, false, sizeof(locked_frame.list));
 		memset(expanded_wild, false, sizeof(expanded_wild));
-		memset(screen.list, 0, sizeof(screen.list));
 	}
 	else {
 		for (i = 0; i < game_state.width; i++) {
 			for (j = 0; j < game_state.height[i]; j++) {
 				if (!expanded_wild[i]) {
 					if (screen.grid[i][j] == WI) {
-						screen.grid[i][j] = LF;
+						locked_frame.grid[i][j] = true;
 					}
 				}
 			}
@@ -42,9 +42,7 @@ void Game_Type::Drawings() {
 		else {
 			pos = positions_reels[i] = (int)rnd.RANDOM(game_state.reel_length[i]);
 			for (j = 0; j < game_state.height[i]; j++) {
-				if (screen.grid[i][j] != LF) {
-					screen.grid[i][j] = game_state.reels[i][(pos + j) % game_state.reel_length[i]];
-				}
+				screen.grid[i][j] = game_state.reels[i][(pos + j) % game_state.reel_length[i]];
 			}
 		}
 	}
@@ -59,7 +57,7 @@ void Game_Type::Drawings() {
 		for (i = 0; i < game_state.width; i++) {
 			wild_count[i] = 0;
 			for (j = 0; j < game_state.height[i]; j++) {
-				if (screen.grid[i][j] == WI || screen.grid[i][j] == LF) {
+				if (screen.grid[i][j] == WI || locked_frame.grid[i][j]) {
 					wild_count[i]++;
 				}
 			}
@@ -76,7 +74,7 @@ void Game_Type::Drawings() {
 		}
 		if (!free_spin_lightning_ind) {
 			for (j = 0; j < game_state.height[wild_count_max_column]; j++) {
-				if ((screen.grid[wild_count_max_column][j] != WI) && (screen.grid[wild_count_max_column][j] != LF)) {
+				if ((screen.grid[wild_count_max_column][j] != WI) && (locked_frame.grid[wild_count_max_column][j])) {
 					screen.grid[wild_count_max_column][j] = WI;
 				}
 			}
@@ -89,7 +87,7 @@ void Game_Type::Drawings() {
 void Game_Type::LinesAnalysis(){
 	int i, j, k;
 	int win_symb;
-	int win, win_cur;
+	int win;
 	int pos[WIDTH];
 	bool used[HEIGHT];
 	int matches_count[SYMBOLS][WIDTH];
@@ -164,11 +162,10 @@ void Game_Type::LinesAnalysis(){
 			}
 
 			if (specific_symbpol) {
-				win_cur = win;
-				win_spin += win_cur;
+				win_spin += win;
 				winlines_desc[win_lines].is_win = true;
 				winlines_desc[win_lines].length = matches_lenth[k];
-				winlines_desc[win_lines].value = win_cur;
+				winlines_desc[win_lines].value = win;
 				winlines_desc[win_lines].symbol = k;
 				winlines_desc[win_lines].multiplier = multiplier;
 				for (j = 0; j < matches_lenth[k]; j++) {
@@ -225,7 +222,7 @@ void Game_Type::Lightning() {
 		}
 		int wild_count = 0;
 		for (j = 0; j < game_state.height[i]; j++) {
-			if (screen.grid[i][j] == WI || screen.grid[i][j] == LF) {
+			if (screen.grid[i][j] == WI || locked_frame.grid[i][j]) {
 				wild_count++;
 			}
 		}

@@ -90,15 +90,9 @@ void Game_Type::SetBase() {
 	game_state.SetBase();
 
 	int i;
-	for (i = 0; i < game_state.width; i++) {
-		positions_reels[i] = 0;
-	}
-	for (i = 0; i < game_state.cells; i++) {
-		screen.list[i] = -1;
-	}
-	for (i = 0; i < game_state.width; i++) {
-		expanded_wild[i] = false;
-	}
+
+	memset(locked_frame.list, false, sizeof(locked_frame.list));
+	memset(expanded_wild, false, sizeof(expanded_wild));
 
 	win_lines = 0;
 
