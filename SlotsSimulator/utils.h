@@ -28,4 +28,20 @@ void read_int_file(const wchar_t * filename, int * tgt);
 void sum_int64_arr(UINT64 dst[], UINT64 term[], UINT64 len);
 void max_int64_arr(UINT64 dst[], UINT64 term[], UINT64 len);
 
+/*
+ * Array template common functions
+ */
 
+template <typename T, size_t N> void fill_arr(T(&arr)[N], const T value) {
+	for (int j = 0; j < N; j++) {
+		arr[j] = value;
+	}
+}
+template <typename T, size_t N> bool all_equal(const T(&arr)[N], const T value) {
+	for (auto elem : arr) {
+		if (elem != value) {
+			return false;
+		}
+	}
+	return true;
+}

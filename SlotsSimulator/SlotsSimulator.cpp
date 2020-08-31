@@ -160,7 +160,7 @@ int bulk_log_results(char * filename, int maxlen, const char * gamename, int gam
 
 	// Header
 	mbstowcs_s(&tmp, w_gamename, 100, gamename, 100);
-	fwprintf_s(log_file, L"GAME: %s\n", w_gamename);
+	fwprintf_s(log_file, L"GAME:\t%s\n", w_gamename);
 	fwprintf_s(log_file, L"Start\t%04d-%02d-%02d %02d:%02d:%02d (UTC%+03d:%02d)\n", simulator.start.tm_year + 1900,
 		simulator.start.tm_mon + 1, simulator.start.tm_mday,
 		simulator.start.tm_hour, simulator.start.tm_min, simulator.start.tm_sec,
@@ -269,6 +269,9 @@ int bulk_log_results(char * filename, int maxlen, const char * gamename, int gam
 	print_line(log_file, simulator.base_game.game_state.data->params.MultiplierWeights[0], MULTIPLIER_OPTIONS);
 	print_line(log_file, simulator.base_game.game_state.data->params.MultiplierWeights[1], MULTIPLIER_OPTIONS);
 	fwprintf_s(log_file, L"\n");
+	fwprintf_s(log_file, L"# Free Spins sequence length\n%d\n\n", simulator.base_game.game_state.data->params.FreeSpins);
+	fwprintf_s(log_file, L"# Lightning sequence length\n%d\n\n", simulator.base_game.game_state.data->params.LightningSpins);
+	fwprintf_s(log_file, L"# Consolation multiplier\n%d\n\n", simulator.base_game.game_state.data->params.ConsolationPrize);
 
 	fwprintf_s(log_file, L"\nReels (<REELS>)\n");
 	print_reels(log_file, L"#Base reels\n", simulator.base_game.game_state.data->reels[0], simulator.base_game.game_state.data->reel_length[0]);
@@ -376,18 +379,20 @@ int get_symbol(int line, int reel) {
 }
 
 int get_cell_tag(int line, int reel) {
-	return simulator.base_game.locked_frame.grid[reel][line];
+	return simulator.base_game.locked_frame[simulator.base_game.SuperType()].grid[reel][line];
 }
 
 int get_spin_message(char * message, int max_len) {
-	if (simulator.base_game.multiplier_now == 0) {
-		message[0] = '\0';
-		return 0;
+	if (simulator.base_game.ñonsolation_ind) {
+		sprintf_s(message, max_len, "Consolation prize");
+		return 1;
 	}
-	else {
+	if (simulator.base_game.multiplier_now != 0) {
 		sprintf_s(message, max_len, "Multiplier = %d", simulator.base_game.multiplier_now);
+		return 1;
 	}
-	return 1;
+	message[0] = '\0';
+	return 0;
 }
 
 UINT64 get_total_paid() {
@@ -441,8 +446,12 @@ int win_line_symbol(int win_line_id) {
 }
 
 int win_line_is_win(int win_line_id) {
-	return (win_line_id < simulator.base_game.win_lines) ? 1 : 0;
-//	return simulator.base_game.winlines_desc[win_line_id].is_win;
+#ifdef WAY_TO_WIN_GAME
+		return (win_line_id < simulator.base_game.win_lines) ? 1 : 0;
+#endif
+#ifdef PAYLINES_GAME
+		return simulator.base_game.winlines_desc[win_line_id].is_win;
+#endif
 }
 
 int win_line_length(int win_line_id) {
@@ -458,33 +467,13 @@ int win_line_where(int win_line_id, int reel) {
 }
 
 int get_win_line_maxcount() {
+#ifdef WAY_TO_WIN_GAME
 	return simulator.base_game.win_lines;
+#endif
+#ifdef PAYLINES_GAME
+	return PAYLINES;
+#endif
 }
-
-int right_line_symbol(int win_line_id) {
-	return 0;
-}
-
-int right_line_is_win(int win_line_id) {
-	return 0;
-}
-
-int right_line_length(int win_line_id) {
-	return 0;
-}
-
-int right_line_value(int win_line_id) {
-	return 0;
-}
-
-int right_line_where(int win_line_id, int reel) {
-	return 0;
-}
-
-int get_right_line_maxcount() {
-	return 0;
-}
-
 
 //////////////////////////////////////////////////
 int get_width() {

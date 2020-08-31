@@ -22,12 +22,12 @@ long R(long scope) {
 
 std::once_flag initRNG;
 long SlotRandom::RANDOM(long scope) {  //The randomizing
-	std::call_once(initRNG, InitG);
 	return (wyhash64()) % scope;
 }
 
 SlotRandom::SlotRandom()  //main initialization
 {
+	std::call_once(initRNG, InitG);
 	wyhash64_x = (((UINT64)rand()) << 32) + (UINT64)rand();
 } //
 

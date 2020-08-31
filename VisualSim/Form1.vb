@@ -316,6 +316,7 @@ Public Class Form1
                 prBulk.Invoke(Sub() prBulk.Value = val1)
             Next j ' Outer loop for bulk processing
             If threads > 1 Then
+                txtTechInfo.Invoke(Sub() txtTechInfo.Text = "Aggregating...")
                 BulkAggStats()
             End If
         End If
@@ -323,6 +324,7 @@ Public Class Form1
         Dim LogFileName As StringBuilder
         LogFileName = New StringBuilder(100)
         LogFileName.Append(LogPrefix)
+        txtTechInfo.Invoke(Sub() txtTechInfo.Text = "Writing log...")
         BulkLog(LogFileName, LogFileName.Capacity, GameName_1, GameName_1.Capacity)
         lblLogFileName.Text = "Saved log to " & LogFileName.ToString()
         mode = simMode.smBulkCalculated

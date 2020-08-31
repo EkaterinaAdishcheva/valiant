@@ -1,3 +1,12 @@
 # Lightning mitiplier
 1	2	3	4	5	6	7	8
 50	25	10	8	4	2	1	1
+
+# Free Spins sequence length
+12
+# Lightning sequence length
+3
+
+# Consolation multiplier
+3
+

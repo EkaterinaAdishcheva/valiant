@@ -3,6 +3,8 @@
 /*
 Cornerstone
 */
+#define WAY_TO_WIN_GAME
+//#define PAYLINES_GAME
 
 /*
 Base definitions
@@ -22,6 +24,7 @@ enum Spin_Type {
 	lighting_spin = 1,
 	free_respin = 2,
 	lighting_free_spin = 3,
+	no_spin = -1,
 };
 
 #define REEL_OPTIONS 1
@@ -33,8 +36,8 @@ enum Spin_Type {
 #define WIDTH  5
 #define HEIGHT 4
 #define PAYLINES  1024
-// 4096 game, all paylines are assessed
-#define REELLENMAX 1000
+// ways game, all paylines are assessed
+#define REELLENMAX 1100
 
 #define DEFAULT_BET 1
 
@@ -73,6 +76,8 @@ Game setup
 class Game_Params_Type {
 public:
 	int MultiplierWeights[2][MULTIPLIER_OPTIONS];
+	int FreeSpins, LightningSpins;
+	int ConsolationPrize;
 
 	Game_Params_Type() { ; }
 	~Game_Params_Type() { ; }
@@ -131,6 +136,12 @@ public:
 };
 //------------------------------------------
 
+template <typename T> union Game_Screen_Type {
+	T grid[WIDTH][HEIGHT];
+	T list[(HEIGHT)*(WIDTH)];
+};
+
+
 /*
 Class implementing main functionality of the game
 */
@@ -138,69 +149,61 @@ class Game_Type {
 private:
 	SlotRandom rnd;
 public:
-		Game_Type() : game_state(), rnd() {
-			SetBase();
-		};
-		Game_Type(Game_Data_Type * data) : game_state(data), rnd() {
-			SetBase();
-		};
-		~Game_Type(){ ; }
+	Game_Type() : game_state(), rnd() {
+		SetBase();
+	};
+	Game_Type(Game_Data_Type * data) : game_state(data), rnd() {
+		SetBase();
+	};
+	~Game_Type(){ ; }
 
-		void SetBase();  //setting base parameters
-		Game_State_Type game_state;
-		void SetBet(int bet) { game_state.SetBet(bet); }  //setting bet per game
+	void SetBase();  //setting base parameters
+	Game_State_Type game_state;
+	void SetBet(int bet) { game_state.SetBet(bet); }  //setting bet per game
 
-		void Drawings();               // drawings
-		int positions_reels[WIDTH];    // reels positions
-		union {
-			int grid[WIDTH][HEIGHT];
-			int list[(WIDTH)*(HEIGHT)];
-		} screen; // symbols on the grid. two ways to access
-		union {
-			bool grid[WIDTH][HEIGHT];
-			bool list[(WIDTH)*(HEIGHT)];
-		} locked_frame; // places where locked frames are put
+	void Drawings();               // drawings
+	int positions_reels[WIDTH];    // reels positions
+	Game_Screen_Type<int> screen; // symbols on the grid. two ways to access
+	Game_Screen_Type<bool> locked_frame[2]; // places where locked frames are put
 
-		bool expanded_wild[WIDTH];
-		bool reset_game;
+	bool expanded_wild[WIDTH];
+	int multiplier_now, multiplier_next;
 
-		int multiplier_now;
-		int multiplier_next;
+	LineDescription winlines_desc[PAYLINES];
+	int win_lines;
 
-		LineDescription winlines_desc[PAYLINES];
-		int win_lines;
+	void LinesAnalysis(); //calculate base winnings
+	void Lightning(); //lightning feature
+	void ScatterAnalysis(); //calculate scatters
 
-		void LinesAnalysis(); //calculate base winnings
-		void Lightning(); //lightning feature
-		void ScatterAnalysis(); //calculate scatters
-
-		// winnings
-		UINT64 win_spin;    //summary of wins for current spin
-		UINT64 win_seq;     //summary of wins for sequence of feature spins
-		UINT64 win_base;    //summary of wins for base game (including cascades)
-		UINT64 win_game;	// total win for the game
-		UINT64 win_lightning;	// total win for the lightning respin
-		bool free_spin_lightning_ind; // indicator that free spins lead to lightning game 
+	// winnings
+	UINT64 win_spin;    //summary of wins for current spin
+	UINT64 win_seq;     //summary of wins for sequence of feature spins
+	UINT64 win_base;    //summary of wins for base game (including cascades)
+	UINT64 win_game;	// total win for the game
+	UINT64 win_lightning;	// total win for the lightning respin
+	bool free_spin_lightning_ind; // indicator that free spins lead to lightning game 
+	bool ñonsolation_ind;
 
 
-		// Spin mode spec
-		int spin_type_now, spin_type_next;        //paid_spin / free_spin
-		bool IsBaseSpin();
-		bool NextBaseSpin();
-		int GameIdx();
-		int NextIdx();
+	// Spin mode spec
+	int spin_type_now, spin_type_next, spin_type_prev;        //paid_spin / free_spin
+	bool IsBaseSpin();
+	bool NextBaseSpin();
+	int GameIdx();
+	int NextIdx();
+	int SuperType();
 
-		// Free spins counters
-		int free_spins_awarded[SPIN_TYPES];    //remaining free spins number
-		int free_spin_order[SPIN_TYPES];    //current free spins number
+	// Free spins counters
+	int free_spins_awarded[SPIN_TYPES];    //remaining free spins number
+	int free_spin_order[SPIN_TYPES];    //current free spins number
 
-		bool IsNewBonusAwarded();
-		bool IsLastInSequence();
-		bool IsCollectingSpin();
+	bool IsNewBonusAwarded();
+	bool IsLastInSequence();
+	bool IsCollectingSpin();
 
-		// Major spin iteration method
-		void OneSpinExecute();  //execute one spin
-
+	// Major spin iteration method
+	void OneSpinExecute();  //execute one spin
 };
 
 

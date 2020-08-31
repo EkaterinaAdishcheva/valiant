@@ -89,27 +89,20 @@ void Game_Data_Type::LoadData() {
 void Game_Type::SetBase() {
 	game_state.SetBase();
 
-	int i;
-
-	memset(locked_frame.list, false, sizeof(locked_frame.list));
-	memset(expanded_wild, false, sizeof(expanded_wild));
-
 	win_lines = 0;
-
 	win_spin = win_seq = win_base = win_game = 0;
+	spin_type_next = paid_spin;
+	spin_type_now = spin_type_prev = no_spin;
 
-	spin_type_now = spin_type_next = paid_spin;
-
-	for (i = 0; i < SPIN_TYPES; i++)
-	{
-		free_spins_awarded[i] = 0;
-		free_spin_order[i] = 0;
-	}
+	fill_arr(free_spins_awarded, 0);
+	fill_arr(free_spin_order, 0);
+	fill_arr(locked_frame[0].list, false);
+	fill_arr(locked_frame[1].list, false);
+	fill_arr(expanded_wild, false);
+	
 	win_lightning = 0;
 	free_spin_lightning_ind = false;
 	multiplier_now = multiplier_next = 0;
-
-	reset_game = true;
 }
 //----------------------------------------------------------------------
 
@@ -128,6 +121,11 @@ bool Game_Type::NextBaseSpin() {
 bool Game_Type::IsLastInSequence() {
 	return spin_type_next == paid_spin && spin_type_now == lighting_spin;
 }
+int Game_Type::SuperType() {
+	return spin_type_now == paid_spin || spin_type_now == lighting_spin
+		? 0 : 1;
+}
+
 
 //----------------------------------------------------------------------
 
