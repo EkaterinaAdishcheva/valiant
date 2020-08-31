@@ -80,7 +80,7 @@ int bulk_agg_stat() {
 		sum_int64_arr((UINT64*)&simulator.bonus_trigger[0][0], (UINT64*)&simulators[j]->bonus_trigger[0][0], sizeof(simulator.bonus_trigger) / sizeof(UINT64));
 
 
-		UINT64 idx = simulators[j]->group_count - 1;
+		int idx = simulators[j]->group_count - 1;
 		while (idx >= 0 && simulator.group_count < GROUPS_MAX) {
 			simulator.group_win[simulator.group_count] = simulators[j]->group_win[idx--];
 			simulator.group_count += 1;
