@@ -5,7 +5,8 @@ import random as rm
 import sys
 
 n = 10
-forbid_symb = "11"
+forbid_symb = [ "2" ]
+# do not forbid "1" if two digit symbols are present
 forbid_len = 4
 
 repertoir_files = ["repertoir" + suffix + ".txt" for suffix in sys.argv[2:]]
@@ -15,6 +16,7 @@ sys.stderr.write("output: " + output_file + "\n")
 
 repertoirs = []
 reellens = []
+forbids = []
 o = open(output_file, "w+", encoding="utf-8")
 
 reel = 1
@@ -50,39 +52,50 @@ for repertoir_file in repertoir_files:
 			reellen += (line.count(" ") + 1) * count
 	repertoirs.append(repertoir)
 	reellens.append(reellen)
-	if forbid_symb != '':
-		sys.stderr.write("reel #" + str(reel) + " len = " + str(reellen) + " " + forbid_symb + " -> " + str(repertoir.count(forbid_symb)) + "\n")
+	if forbid_symb:
+		cnt = sum( map( lambda x: 0 < sum( map( lambda y: x.startswith(y), forbid_symb)), repertoir))
+		sys.stderr.write(f"reel #{reel}; len = {reellen}; forbid ({forbid_symb}) -> {cnt}\n")
 	else:
-		sys.stderr.write("reel #" + str(reel) + " len = " + str(reellen) + "\n")
+		cnt = 0
+		sys.stderr.write(f"reel #{reel}; len = {reellen}\n")
+	forbids.append(cnt)
+
 	reel += 1
 
 for nn in range(n):
 	for l in start_comment:
-		o.write(l + "\n")
+		o.write(f"{l}\n")
 	idx1 = 0
-	for r in repertoirs:
-		if forbid_symb == "" or r.count(forbid_symb) == 0:
-			rm.shuffle(r)
-			res = r
+	for ir in range(len(repertoirs)):
+		if not forbids[ir]:
+			res = repertoirs[ir].copy()
+			rm.shuffle(res)
 		else:
-			cnt_forbid = r.count(forbid_symb)
-			tmp_r = list(filter(lambda x: x!=forbid_symb, r))
+			rep_base   = list(filter(lambda x: 0 == sum( map( lambda y: x.startswith(y), forbid_symb)), repertoirs[ir]))
+			rep_forbid = list(filter(lambda x: 0  < sum( map( lambda y: x.startswith(y), forbid_symb)), repertoirs[ir]))
+			rm.shuffle(rep_base)
+			rm.shuffle(rep_forbid)
+			
+			forbid_act = forbid_len
+			while (len(rep_base) - forbids[ir] * forbid_act) < 0:
+				forbid_act -= 1
+			if forbid_act != forbid_len:
+				sys.stderr.write(f"Warning: forbid len reduced to {forbid_act}\n")
 
 			forbid_pos = (
-				[1] * cnt_forbid +
-				[0] * (len(r) - cnt_forbid * (forbid_len + 1))
+				['f'] * forbids[ir] +
+				['base'] * (len(rep_base) - forbids[ir] * forbid_act)
 			)
 			rm.shuffle(forbid_pos)
 			res = []
 			for x in forbid_pos:
-				l = 1
-				if x == 1:
-					res.append(forbid_symb)
-					l = forbid_len
-				pos = rm.sample(range(len(tmp_r)), l)
-				pos.sort(reverse = True)
-				for p in pos:
-					res.append( tmp_r.pop(p) )
-		o.write("" + str(reellens[idx1]) + ":\t" + "\t".join(res) + "\n")
+				if x == 'f':
+					res.append(rep_forbid.pop())
+					for _ in range(forbid_act):
+						res.append(rep_base.pop())
+				else: # 'base'
+					res.append(rep_base.pop())
+		str1 = "\t".join(res)
+		o.write(f"{reellens[idx1]} {str1}\n")
 		idx1 += 1
 	o.write("\n")

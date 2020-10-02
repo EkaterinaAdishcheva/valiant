@@ -436,7 +436,7 @@ Public Class Form1
         Next
 
 
-        Dim limit_wait As Long = 1000000
+        Dim limit_wait As Long = 200000000
         Dim waited As Long = limit_wait
 
         If waiting_on Then

@@ -4,9 +4,10 @@
 
 # Free Spins sequence length
 12
+
 # Lightning sequence length
 3
 
 # Consolation multiplier
-3
+2
 

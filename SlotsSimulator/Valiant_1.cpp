@@ -68,7 +68,7 @@ void Game_Type::Drawings() {
 			}
 		}
 	}
-
+		
 	// Add expanded wild column on 12th free spin (if it has not occured earlier)
 	int wild_count_max_column;
 	if ((spin_type_now == free_respin)
@@ -238,14 +238,19 @@ void Game_Type::Lightning() {
 			count_expanded += 1;
 			continue;
 		}
-		int wild_count = 0;
+		int wild_count = 0, wild_only = 0;
 		for (j = 0; j < game_state.height[i]; j++) {
 			if (screen.grid[i][j] == WI || locked_frame[SuperType()].grid[i][j]) {
 				wild_count++;
 			}
+			if (screen.grid[i][j] == WI) {
+				wild_only++;
+			}
 		}
-		if (wild_count == game_state.height[i])
-		{
+		if (wild_only != 0 && (spin_type_now == lighting_spin || spin_type_now == lighting_free_spin)) {
+			free_spin_order[spin_type_now] = 0;
+		}
+		if (wild_count == game_state.height[i]) {
 			expanded_wild[i] = true;
 
 			if (spin_type_now == free_respin || spin_type_now == lighting_free_spin) {
