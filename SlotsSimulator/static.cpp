@@ -90,7 +90,7 @@ void Game_Type::SetBase() {
 	game_state.SetBase();
 
 	win_lines = 0;
-	win_spin = win_seq = win_base = win_game = 0;
+	win_spin = win_seq = win_base = win_free = win_game = 0;
 	spin_type_next = paid_spin;
 	spin_type_now = spin_type_prev = no_spin;
 
@@ -119,11 +119,13 @@ bool Game_Type::NextBaseSpin() {
 	return spin_type_next == paid_spin;
 }
 bool Game_Type::IsLastInSequence() {
-	return spin_type_next == paid_spin && spin_type_now == lighting_spin;
+	return spin_type_now == paid_spin && spin_type_next != lighting_spin
+		|| spin_type_now == lighting_spin && spin_type_next != lighting_spin
+		|| spin_type_now == free_respin && spin_type_next != lighting_free_spin
+		|| spin_type_now == lighting_free_spin && spin_type_next != lighting_free_spin;
 }
 int Game_Type::SuperType() {
-	return spin_type_now == paid_spin || spin_type_now == lighting_spin
-		? 0 : 1;
+	return (spin_type_now == paid_spin || spin_type_now == lighting_spin) ? 0 : 1;
 }
 
 

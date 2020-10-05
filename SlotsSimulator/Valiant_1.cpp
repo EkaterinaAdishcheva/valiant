@@ -293,9 +293,15 @@ void Game_Type::OneSpinExecute()  //executing of one game
 	win_spin = 0;
 	ñonsolation_ind = false;
 	if (spin_type_now == paid_spin) {
-		win_seq = win_game = 0;
+		win_game = win_base = 0;
 		memset(free_spins_awarded, 0, sizeof(free_spins_awarded));
 		memset(free_spin_order, 0, sizeof(free_spin_order));
+	}
+	if (spin_type_now != lighting_free_spin) {
+		win_free = 0;
+	}
+	if (spin_type_now == paid_spin || spin_type_now == free_respin) {
+		win_seq = 0;
 	}
 	if (spin_type_now == free_respin) {
 		free_spins_awarded[lighting_free_spin] = 0;
@@ -315,12 +321,6 @@ void Game_Type::OneSpinExecute()  //executing of one game
 	ScatterAnalysis();
 	Lightning();
 
-	win_game += win_spin;
-	if (spin_type_now != paid_spin)
-	{
-		win_seq += win_spin;
-	}
-
 	if (spin_type_now == lighting_spin || spin_type_now == lighting_free_spin)
 	{
 		win_lightning += win_spin;
@@ -331,6 +331,17 @@ void Game_Type::OneSpinExecute()  //executing of one game
 			ñonsolation_ind = true;
 		}
 	}
+
+
+	win_game += win_spin;
+	win_seq += win_spin;
+	if (spin_type_now == paid_spin || spin_type_now == lighting_spin) {
+		win_base += win_spin;
+	}
+	if (spin_type_now == free_respin || spin_type_now == lighting_free_spin) {
+		win_free += win_spin;
+	}
+
 
 	for (int j = 3; j > 0; j--) {
 		if (free_spins_awarded[j] > free_spin_order[j]) {

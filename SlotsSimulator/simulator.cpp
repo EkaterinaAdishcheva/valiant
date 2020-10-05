@@ -58,6 +58,8 @@ void Simulator_Type::ResetSim() {
 	total_awarded_free_spins = 0;
 	max_awarded_free_spins = 0;
 
+	max_win_spin = max_win_game = max_win_base = max_win_free = max_win_seq = 0;
+
 	memset(win_stat, 0, sizeof(win_stat));
 	memset(win_scatters, 0, sizeof(win_scatters));
 	memset(spin_count_by_type, 0, sizeof(spin_count_by_type));
@@ -121,6 +123,9 @@ void Simulator_Type::AnalyzeOneSpin() {
 			max_win_game = base_game.win_game;
 		}
 	}
+	if (base_game.IsLastInSequence()) {
+		seqs_count_by_win[base_game.win_seq][base_game.SuperType()] ++;
+	}
 
 	// Awarded/retriggered free spins
 	if (base_game.IsNewBonusAwarded()) {
@@ -140,6 +145,12 @@ void Simulator_Type::AnalyzeOneSpin() {
 		}
 		if (base_game.win_base > max_win_base) {
 			max_win_base = base_game.win_base;
+		}
+		if (base_game.win_free > max_win_free) {
+			max_win_free = base_game.win_free;
+		}
+		if (base_game.win_seq > max_win_seq) {
+			max_win_seq = base_game.win_seq;
 		}
 	}
 

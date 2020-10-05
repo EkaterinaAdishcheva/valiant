@@ -67,6 +67,12 @@ int bulk_agg_stat() {
 		if (simulator.max_win_base < simulators[j]->max_win_base) {
 			simulator.max_win_base = simulators[j]->max_win_base;
 		}
+		if (simulator.max_win_free < simulators[j]->max_win_free) {
+			simulator.max_win_free = simulators[j]->max_win_free;
+		}
+		if (simulator.max_win_seq < simulators[j]->max_win_seq) {
+			simulator.max_win_seq = simulators[j]->max_win_seq;
+		}
 
 		sum_int64_arr((UINT64*)&simulator.win_stat[0][0][0][0], (UINT64*)&simulators[j]->win_stat[0][0][0][0], sizeof(simulator.win_stat)/sizeof(UINT64));
 		sum_int64_arr((UINT64*)&simulator.win_scatters[0][0], (UINT64*)&simulators[j]->win_scatters[0][0], sizeof(simulator.win_scatters) / sizeof(UINT64));
@@ -74,7 +80,7 @@ int bulk_agg_stat() {
 		sum_int64_arr(simulator.total_win_by_type, simulators[j]->total_win_by_type, SLOT_VARIANTS);
 		max_int64_arr(simulator.max_win_spin_by_type, simulators[j]->max_win_spin_by_type, SLOT_VARIANTS);
 		sum_int64_arr(&simulator.spin_count_by_win[0][0], &simulators[j]->spin_count_by_win[0][0], sizeof(simulator.spin_count_by_win) / sizeof(UINT64));
-		sum_int64_arr(&simulator.seqs_count_by_win[0][0][0], &simulators[j]->seqs_count_by_win[0][0][0], sizeof(simulator.seqs_count_by_win) / sizeof(UINT64));
+		sum_int64_arr(&simulator.seqs_count_by_win[0][0], &simulators[j]->seqs_count_by_win[0][0], sizeof(simulator.seqs_count_by_win) / sizeof(UINT64));
 		sum_int64_arr(simulator.game_count_by_win, simulators[j]->game_count_by_win, Simulator_Type::max_win_cap(simulator.max_win_game) + 1);
 		sum_int64_arr((UINT64*)&simulator.seqs_count_by_len[0][0], (UINT64*)&simulators[j]->seqs_count_by_len[0][0], sizeof(simulator.seqs_count_by_len) / sizeof(UINT64));
 		sum_int64_arr((UINT64*)&simulator.bonus_trigger[0][0], (UINT64*)&simulators[j]->bonus_trigger[0][0], sizeof(simulator.bonus_trigger) / sizeof(UINT64));
@@ -187,7 +193,8 @@ int bulk_log_results(char * filename, int maxlen, const char * gamename, int gam
 	else {
 		fwprintf_s(log_file, L"\n");
 	}
-	fwprintf_s(log_file, L"MAX BASE WIN\t%I64u\n", simulator.max_win_base);
+	fwprintf_s(log_file, L"MAX BASE WIN\t%I64u\tMAX FREE WIN\t%I64u\n",
+		simulator.max_win_base, simulator.max_win_free);
 
 	double rtp = simulator.CurrentRTP();
 	fwprintf_s(log_file, L"RTP\t%.3lf\n", rtp);
@@ -331,15 +338,13 @@ int bulk_log_results(char * filename, int maxlen, const char * gamename, int gam
 
 	// Sequences data
 	fwprintf_s(log_file, L"\nSeqs by win\nSType\tSeq win\tUpgr\tSeqs\tTotal\n");
-	for (i = 0; i < Simulator_Type::max_win_cap(simulator.max_win_game); i++) {
-		for (k = 1; k < SPIN_TYPES; k++) {
-			for (j = 0; j <= WIDTH; j++) {
-				if (simulator.seqs_count_by_win[i][k][j] != 0) {
-					fwprintf_s(log_file, L"%d\t%d\t%d\t%I64u\t%I64u\n", k, i, j,
-						simulator.seqs_count_by_win[i][k][j],
-						simulator.seqs_count_by_win[i][k][j] * i
-					);
-				}
+	for (i = 0; i <= Simulator_Type::max_win_cap(simulator.max_win_seq); i++) {
+		for (k = 0; k <= 1; k++) {
+			if (simulator.seqs_count_by_win[i][k] != 0) {
+				fwprintf_s(log_file, L"%d\t%d\t%d\t%I64u\t%I64u\n", k, i, 0,
+					simulator.seqs_count_by_win[i][k],
+					simulator.seqs_count_by_win[i][k] * i
+				);
 			}
 		}
 	}

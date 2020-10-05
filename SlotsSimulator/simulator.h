@@ -36,11 +36,11 @@ public:
 	win_stat_t win_stat[SYMBOLS][WIDTH + 1][SLOT_VARIANTS][MAXMULT + 1];
 	win_stat_t win_scatters[WIDTH + 1][SLOT_VARIANTS];
 	UINT64 spin_count_by_win[MAX_WIN][SLOT_VARIANTS];
-	UINT64 seqs_count_by_win[MAX_WIN][SPIN_TYPES][WIDTH + 1];
+	UINT64 seqs_count_by_win[MAX_WIN][SPIN_TYPES];
 	UINT64 game_count_by_win[MAX_WIN];
 	win_stat_t seqs_count_by_len[MAX_SEQ][SPIN_TYPES];
 	UINT64 max_win_spin_by_type[SLOT_VARIANTS];
-	UINT64 max_win_spin, max_win_game, max_win_base;
+	UINT64 max_win_spin, max_win_game, max_win_base, max_win_free, max_win_seq;
 
 	UINT64 group_win[GROUPS_MAX];
 	UINT64 group_count, pos_in_group;

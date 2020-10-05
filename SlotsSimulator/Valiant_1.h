@@ -179,7 +179,7 @@ public:
 	// winnings
 	UINT64 win_spin;    //summary of wins for current spin
 	UINT64 win_seq;     //summary of wins for sequence of feature spins
-	UINT64 win_base;    //summary of wins for base game (including cascades)
+	UINT64 win_base, win_free;    //summary of wins for base game (including respin)
 	UINT64 win_game;	// total win for the game
 	UINT64 win_lightning;	// total win for the lightning respin
 	bool free_spin_lightning_ind; // indicator that free spins lead to lightning game 
