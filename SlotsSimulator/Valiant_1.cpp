@@ -30,8 +30,8 @@ void Game_Type::Drawings() {
 		|| spin_type_now == paid_spin && spin_type_prev == no_spin) {
 
 		// Reset frames on entering free respins or on 1st spin
-		memset(locked_frame[SuperType()].list, false, sizeof(locked_frame[0].list));
-		memset(expanded_wild, false, sizeof(expanded_wild));
+		memset(locked_frame[SuperType()].list, 0, sizeof(locked_frame[0].list));
+		memset(expanded_wild, 0, sizeof(expanded_wild));
 	}
 	else if (spin_type_now == paid_spin && spin_type_prev == lighting_free_spin) {
 		fill_arr(expanded_wild, false);
@@ -71,8 +71,8 @@ void Game_Type::Drawings() {
 		
 	// Add expanded wild column on 12th free spin (if it has not occured earlier)
 	int wild_count_max_column;
-	if ((spin_type_now == free_respin)
-		&& (free_spin_order[free_respin] == game_state.data->params.FreeSpins)
+	if (spin_type_now == free_respin
+		&& free_spin_order[free_respin] == game_state.data->params.FreeSpins
 		&& !free_spin_lightning_ind) {
 
 		int wild_count[WIDTH];
@@ -173,15 +173,15 @@ void Game_Type::LinesAnalysis(){
 		memset(pos, 0, sizeof(pos));
 	
 		while (1) {
-			bool specific_symbpol = false;
+			bool specific_symbol = false;
 			for (j = 0; j < matches_lenth[k]; j++) {
 				if (screen.grid[j][matches[k][j][pos[j]]] == k) {
-					specific_symbpol = true;
+					specific_symbol = true;
 					break;
 				}
 			}
 
-			if (specific_symbpol) {
+			if (specific_symbol) {
 				win_spin += win;
 				winlines_desc[win_lines].is_win = true;
 				winlines_desc[win_lines].length = matches_lenth[k];
@@ -226,6 +226,7 @@ void Game_Type::ScatterAnalysis() {
 	if (scatter_count >= 3) {
 		free_spins_awarded[free_respin] = game_state.data->params.FreeSpins;
 		free_spin_lightning_ind = false;
+		free_spins_awarded[lighting_spin] = free_spin_order[lighting_spin] = 0;
 	}
 }
 
@@ -253,8 +254,9 @@ void Game_Type::Lightning() {
 		if (wild_count == game_state.height[i]) {
 			expanded_wild[i] = true;
 
+			int spin_type;
 			if (spin_type_now == free_respin || spin_type_now == lighting_free_spin) {
-				spin_type_next = lighting_free_spin;
+				spin_type = lighting_free_spin;
 
 				multiplier_next = multiplier_now +
 					rnd.random_weighted_val(game_state.data->params.MultiplierWeights[0],
@@ -263,10 +265,10 @@ void Game_Type::Lightning() {
 						MULTIPLIER_OPTIONS);
 			}
 			else {
-				spin_type_next = lighting_spin;
+				spin_type = lighting_spin;
 			}
-			free_spins_awarded[spin_type_next] = game_state.data->params.LightningSpins;
-			free_spin_order[spin_type_next] = 0;
+			free_spins_awarded[spin_type] = game_state.data->params.LightningSpins;
+			free_spin_order[spin_type] = 0;
 
 			if (spin_type_now == free_respin) {
 				free_spin_lightning_ind = true;
@@ -288,7 +290,6 @@ void Game_Type::OneSpinExecute()  //executing of one game
 	multiplier_now = multiplier_next;
 
 	game_state.SetSpinType(spin_type_now);
-	spin_type_next = paid_spin;
 
 	win_spin = 0;
 	ñonsolation_ind = false;
@@ -300,7 +301,8 @@ void Game_Type::OneSpinExecute()  //executing of one game
 	if (spin_type_now != lighting_free_spin) {
 		win_free = 0;
 	}
-	if (spin_type_now == paid_spin || spin_type_now == free_respin) {
+	if (spin_type_now == paid_spin ||
+			spin_type_now == free_respin && spin_type_prev != free_respin && spin_type_prev !=  lighting_free_spin) {
 		win_seq = 0;
 	}
 	if (spin_type_now == free_respin) {
@@ -332,7 +334,6 @@ void Game_Type::OneSpinExecute()  //executing of one game
 		}
 	}
 
-
 	win_game += win_spin;
 	win_seq += win_spin;
 	if (spin_type_now == paid_spin || spin_type_now == lighting_spin) {
@@ -342,10 +343,8 @@ void Game_Type::OneSpinExecute()  //executing of one game
 		win_free += win_spin;
 	}
 
-
-	for (int j = 3; j > 0; j--) {
-		if (free_spins_awarded[j] > free_spin_order[j]) {
-			spin_type_next = j;
+	for (spin_type_next = SPIN_TYPES - 1; spin_type_next > 0; spin_type_next--) {
+		if (free_spins_awarded[spin_type_next] > free_spin_order[spin_type_next]) {
 			break;
 		}
 	}
@@ -355,3 +354,6 @@ void Game_Type::OneSpinExecute()  //executing of one game
 	}
 }
 //----------------------------------------------------------------------------
+
+
+

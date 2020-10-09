@@ -4,13 +4,13 @@ import re
 import random as rm
 import sys
 
-n = 10
-forbid_symb = [ "2" ]
+n = 5
+forbid_symb = [ "10", "11" ]
 # do not forbid "1" if two digit symbols are present
 forbid_len = 4
 
 repertoir_files = ["repertoir" + suffix + ".txt" for suffix in sys.argv[2:]]
-output_file = "reels" + sys.argv[1] + ".txt"
+output_file = "rset" + sys.argv[1] + ".txt"
 sys.stderr.write("using:\n" + "\n".join(repertoir_files) + "\n")
 sys.stderr.write("output: " + output_file + "\n")
 

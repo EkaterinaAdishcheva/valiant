@@ -73,6 +73,9 @@ int bulk_agg_stat() {
 		if (simulator.max_win_seq < simulators[j]->max_win_seq) {
 			simulator.max_win_seq = simulators[j]->max_win_seq;
 		}
+		if (simulator.max_multiplier < simulators[j]->max_multiplier) {
+			simulator.max_multiplier = simulators[j]->max_multiplier;
+		}
 
 		sum_int64_arr((UINT64*)&simulator.win_stat[0][0][0][0], (UINT64*)&simulators[j]->win_stat[0][0][0][0], sizeof(simulator.win_stat)/sizeof(UINT64));
 		sum_int64_arr((UINT64*)&simulator.win_scatters[0][0], (UINT64*)&simulators[j]->win_scatters[0][0], sizeof(simulator.win_scatters) / sizeof(UINT64));
@@ -178,17 +181,23 @@ int bulk_log_results(char * filename, int maxlen, const char * gamename, int gam
 	fwprintf_s(log_file, L"GAMES\t%I64u\n", simulator.spin_count);
 	fwprintf_s(log_file, L"BET\t%d\n", simulator.base_game.game_state.bet_game);
 	fwprintf_s(log_file, L"WIN\t%I64u\n", simulator.total_win);
-	fwprintf_s(log_file, L"PAY\t%I64u\n", simulator.total_paid);
+	fwprintf_s(log_file, L"PAY\t%I64u", simulator.total_paid);
+	if (simulator.max_multiplier >= MAXMULT) {
+		fwprintf_s(log_file, L"\t-- MULTIPLIER OVERFLOW -> %I64u\n", simulator.max_multiplier);
+	}
+	else {
+		fwprintf_s(log_file, L"\n");
+	}
 	fwprintf_s(log_file, L"MAX WIN GAME\t%I64u", simulator.max_win_game);
 	if (simulator.max_win_game >= MAX_WIN) {
-		fwprintf_s(log_file, L"\t-- BEWARE OVERLOAD!!\n");
+		fwprintf_s(log_file, L"\t-- BEWARE OVERFLOW!!\n");
 	}
 	else {
 		fwprintf_s(log_file, L"\n");
 	}
 	fwprintf_s(log_file, L"MAX WIN SPIN\t%I64u", simulator.max_win_spin);
 	if (simulator.max_win_spin >= MAX_WIN) {
-		fwprintf_s(log_file, L"\t-- BEWARE OVERLOAD!!\n");
+		fwprintf_s(log_file, L"\t-- BEWARE OVERFLOW!!\n");
 	}
 	else {
 		fwprintf_s(log_file, L"\n");
@@ -282,8 +291,8 @@ int bulk_log_results(char * filename, int maxlen, const char * gamename, int gam
 
 	fwprintf_s(log_file, L"\nReels (<REELS>)\n");
 	print_reels(log_file, L"#Base reels\n", simulator.base_game.game_state.data->reels[0], simulator.base_game.game_state.data->reel_length[0]);
-	print_reels(log_file, L"#Base lightning reels\n", simulator.base_game.game_state.data->reels[1], simulator.base_game.game_state.data->reel_length[1]);
-	print_reels(log_file, L"#Free game reels\n", simulator.base_game.game_state.data->reels[2], simulator.base_game.game_state.data->reel_length[2]);
+	print_reels(log_file, L"#Free game reels\n", simulator.base_game.game_state.data->reels[1], simulator.base_game.game_state.data->reel_length[1]);
+	print_reels(log_file, L"#Base lightning reels\n", simulator.base_game.game_state.data->reels[2], simulator.base_game.game_state.data->reel_length[2]);
 	print_reels(log_file, L"#Free lightning reels\n", simulator.base_game.game_state.data->reels[3], simulator.base_game.game_state.data->reel_length[3]);
 	fwprintf_s(log_file, L"</REELS>\n\nReel Formula (spec)\n");
 	for (k = 0; k < SYMBOLS; k++) {
@@ -520,11 +529,6 @@ UINT64 get_free_spin_order() {
 	return simulator.base_game.free_spin_order[simulator.base_game.spin_type_now];
 }
 
-
-
-int get_bonus_option() {
-	return 0;
-}
 
 int reload_settings() {
 	simulator.base_game.game_state.data->LoadData();

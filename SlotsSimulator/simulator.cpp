@@ -59,6 +59,7 @@ void Simulator_Type::ResetSim() {
 	max_awarded_free_spins = 0;
 
 	max_win_spin = max_win_game = max_win_base = max_win_free = max_win_seq = 0;
+	max_multiplier = 0;
 
 	memset(win_stat, 0, sizeof(win_stat));
 	memset(win_scatters, 0, sizeof(win_scatters));
@@ -159,14 +160,20 @@ void Simulator_Type::AnalyzeOneSpin() {
 		int l;
 		for (l = 0; l < base_game.win_lines; l++) {
 			if (base_game.winlines_desc[l].is_win) {
+				if (base_game.winlines_desc[l].multiplier > max_multiplier) {
+					max_multiplier = base_game.winlines_desc[l].multiplier;
+				}
+				int multiplier = base_game.winlines_desc[l].multiplier >= MAXMULT
+					? MAXMULT - 1 : base_game.winlines_desc[l].multiplier;
+
 				win_stat[base_game.winlines_desc[l].symbol]
 					[base_game.winlines_desc[l].length]
 				[base_game.GameIdx()]
-				[base_game.winlines_desc[l].multiplier].count += 1;
+				[multiplier].count += 1;
 				win_stat[base_game.winlines_desc[l].symbol]
 					[base_game.winlines_desc[l].length]
 				[base_game.GameIdx()]
-				[base_game.winlines_desc[l].multiplier].value += base_game.winlines_desc[l].value;
+				[multiplier].value += base_game.winlines_desc[l].value;
 			}
 		}
 	}

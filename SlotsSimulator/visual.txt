@@ -6,3 +6,4 @@ SpinType:1:Lighting Re-spins:Y:Y
 SpinType:2:Free Spins:Y:Y
 SpinType:3:Lighting Free Spins:Y:Y
 LogPrefix:Valiant
+Wait:This

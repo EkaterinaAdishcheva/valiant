@@ -121,8 +121,8 @@ bool Game_Type::NextBaseSpin() {
 bool Game_Type::IsLastInSequence() {
 	return spin_type_now == paid_spin && spin_type_next != lighting_spin
 		|| spin_type_now == lighting_spin && spin_type_next != lighting_spin
-		|| spin_type_now == free_respin && spin_type_next != lighting_free_spin
-		|| spin_type_now == lighting_free_spin && spin_type_next != lighting_free_spin;
+		|| spin_type_now == free_respin && spin_type_next != free_respin && spin_type_next != lighting_free_spin
+		|| spin_type_now == lighting_free_spin && spin_type_next != free_respin && spin_type_next != lighting_free_spin;
 }
 int Game_Type::SuperType() {
 	return (spin_type_now == paid_spin || spin_type_now == lighting_spin) ? 0 : 1;
@@ -138,7 +138,4 @@ bool Game_Type::IsNewBonusAwarded() {
 
 bool Game_Type::IsCollectingSpin() {
 	return false;
-/*	return spin_type_now == lighting_spin && spin_type_next == lighting_spin
-		|| spin_type_now == lighting_free_spin && spin_type_next == lighting_free_spin;
-*/
 }

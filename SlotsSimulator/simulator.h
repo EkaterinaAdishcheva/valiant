@@ -8,7 +8,7 @@
 #define MAX_SEQ (WIDTH + 1)
 #define GROUPS_MAX 10000
 #define GROUP_SEP 100000
-#define MAXMULT 1
+#define MAXMULT 100
 
 
 struct win_stat_t {
@@ -41,6 +41,7 @@ public:
 	win_stat_t seqs_count_by_len[MAX_SEQ][SPIN_TYPES];
 	UINT64 max_win_spin_by_type[SLOT_VARIANTS];
 	UINT64 max_win_spin, max_win_game, max_win_base, max_win_free, max_win_seq;
+	UINT64 max_multiplier;
 
 	UINT64 group_win[GROUPS_MAX];
 	UINT64 group_count, pos_in_group;

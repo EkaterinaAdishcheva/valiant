@@ -1,7 +1,7 @@
 #pragma once
 
 /*
-Cornerstone
+Valiant
 */
 #define WAY_TO_WIN_GAME
 //#define PAYLINES_GAME
@@ -21,13 +21,12 @@ enum Symbols {
 #define SPIN_TYPES 4
 enum Spin_Type {
 	paid_spin = 0,
-	lighting_spin = 1,
-	free_respin = 2,
+	lighting_spin = 2,
+	free_respin = 1,
 	lighting_free_spin = 3,
 	no_spin = -1,
 };
 
-#define REEL_OPTIONS 1
 // Number of different reel set
 #define REEL_VARIANTS 4
 // Number of different game states: spin types x reel variants
@@ -184,7 +183,6 @@ public:
 	UINT64 win_lightning;	// total win for the lightning respin
 	bool free_spin_lightning_ind; // indicator that free spins lead to lightning game 
 	bool ñonsolation_ind;
-
 
 	// Spin mode spec
 	int spin_type_now, spin_type_next, spin_type_prev;        //paid_spin / free_spin

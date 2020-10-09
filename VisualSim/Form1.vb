@@ -141,11 +141,14 @@ Public Class Form1
             If j > 0 Then
                 Dim NumGames As String = Environment.GetCommandLineArgs().GetValue(j + 1)
                 Dim multiplier As Long = 1
-                If NumGames.ToUpper().Last = "M" Then
-                    multiplier = 1000000
-                    NumGames = NumGames.Substring(0, NumGames.Length - 1)
-                ElseIf NumGames.ToUpper().Last = "K" Then
+                If NumGames.ToUpper().Last = "K" Then
                     multiplier = 1000
+                    NumGames = NumGames.Substring(0, NumGames.Length - 1)
+                ElseIf NumGames.ToUpper().Last = "M" Then
+                    multiplier = 1000 * 1000
+                    NumGames = NumGames.Substring(0, NumGames.Length - 1)
+                ElseIf NumGames.ToUpper().Last = "B" Then
+                    multiplier = 1000 * 1000 * 1000
                     NumGames = NumGames.Substring(0, NumGames.Length - 1)
                 End If
                 txtNumGames.Text = CLng(NumGames) * multiplier
