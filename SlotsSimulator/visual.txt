@@ -2,8 +2,8 @@ Name:Valiant
 SpinTypes:4
 # "SpinType":ID:NAME:Show total spin count(Y/N)
 SpinType:0:Base Game:N:N
-SpinType:1:Lighting Re-spins:Y:Y
-SpinType:2:Free Spins:Y:Y
+SpinType:2:Lighting Re-spins:Y:Y
+SpinType:1:Free Spins:Y:Y
 SpinType:3:Lighting Free Spins:Y:Y
 LogPrefix:Valiant
-Wait:This
+Wait:Next

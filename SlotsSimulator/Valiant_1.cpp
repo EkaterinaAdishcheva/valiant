@@ -18,31 +18,25 @@ void Game_Type::Drawings() {
 	int i, j, pos;
 
 	if ( spin_type_now == paid_spin && spin_type_prev == lighting_spin
-		|| spin_type_now == lighting_spin && spin_type_prev == lighting_free_spin) {
-		// Clear expanded wilds of frames
-		for (i = 0; i < game_state.width; i++) {
-			if (expanded_wild[i]) {
-				memset(locked_frame[SuperType()].grid[i], false, sizeof(locked_frame[0].grid[0]));
-				expanded_wild[i] = false;
-			}
-		}
-	} else if (spin_type_now == free_respin && spin_type_prev == paid_spin
-		|| spin_type_now == paid_spin && spin_type_prev == no_spin) {
+		|| spin_type_now == free_respin && spin_type_prev == lighting_free_spin) {
 
-		// Reset frames on entering free respins or on 1st spin
-		memset(locked_frame[SuperType()].list, 0, sizeof(locked_frame[0].list));
-		memset(expanded_wild, 0, sizeof(expanded_wild));
-	}
-	else if (spin_type_now == paid_spin && spin_type_prev == lighting_free_spin) {
-		fill_arr(expanded_wild, false);
-	}
-	else if (spin_type_now == free_respin && spin_type_prev == lighting_free_spin) {
+		// Clear expanded wilds of frames
 		for (i = 0; i < game_state.width; i++) {
 			if (expanded_wild[i]) {
 				expanded_wild[i] = false;
 				fill_arr(locked_frame[SuperType()].grid[i], false);
 			}
 		}
+	} else if (spin_type_now == free_respin && spin_type_prev == paid_spin
+		|| spin_type_now == free_respin && spin_type_prev == lighting_spin
+		|| spin_type_now == paid_spin && spin_type_prev == no_spin) {
+
+		// Reset frames on entering free respins or on 1st spin
+		fill_arr(locked_frame[SuperType()].list, false);
+		fill_arr(expanded_wild, false);
+	}
+	else if (spin_type_now == paid_spin && spin_type_prev == lighting_free_spin) {
+		fill_arr(expanded_wild, false);
 	}
 	else {
 		// if no reset is done update locked frames to match wilds positions
@@ -64,7 +58,11 @@ void Game_Type::Drawings() {
 		} else {
 			pos = positions_reels[i] = (int)rnd.RANDOM(game_state.reel_length[i]);
 			for (j = 0; j < game_state.height[i]; j++) {
-				screen.grid[i][j] = game_state.reels[i][(pos + j) % game_state.reel_length[i]];
+				screen.grid[i][j] = game_state.reels[i][pos];
+				pos += 1;
+				if (pos >= game_state.reel_length[i]) {
+					pos = 0;
+				}
 			}
 		}
 	}
@@ -128,19 +126,15 @@ void Game_Type::LinesAnalysis(){
 				wild_count[i] ++;
 			}
 		}
-	}
+	} // wild_count[i] - how many wilds on i-th reel
 
 	for (i = 0; i < game_state.width; i++) {
-		for (k = 0; k < SYMBOLS; k++) {
-			for (j = 0; j < game_state.height[i]; j++)
-			{
-				if (screen.grid[i][j] == k) {
-					matches_lenth[k] = 1;
-				}
-			}
+		for (j = 0; j < game_state.height[i]; j++)
+		{
+			matches_lenth[ screen.grid[i][j] ] = 1;
 		}
 		if (wild_count[i] == 0) { break; }
-	}
+	} // matches_lenth[k] == 1 if symbol k provides a win
 
 	for (k = 0; k < SYMBOLS; k++) {
 		if (matches_lenth[k] > 0) {
@@ -158,6 +152,9 @@ void Game_Type::LinesAnalysis(){
 			}
 		}
 	}
+	// matches_count[k][i]  = how many mathches of symbol k on reel i
+	// matches[k][i][ num ] = height of num-th match of symbol k on reel i
+	// matches_length[k]    = length of math of symbol k
 
 	
 	for (k = 0; k < SYMBOLS; k++) {
@@ -343,7 +340,8 @@ void Game_Type::OneSpinExecute()  //executing of one game
 		win_free += win_spin;
 	}
 
-	for (spin_type_next = SPIN_TYPES - 1; spin_type_next > 0; spin_type_next--) {
+	for (spin_type_next = (SPIN_TYPES - 1); spin_type_next > 0; spin_type_next--) {
+//	for (spin_type_next =2; spin_type_next > 0; spin_type_next-=2) {
 		if (free_spins_awarded[spin_type_next] > free_spin_order[spin_type_next]) {
 			break;
 		}
